@@ -1,6 +1,5 @@
 import { fabric } from 'fabric';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const RectWithText = fabric.util.createClass(fabric.Rect, {
   type: 'rectWithText',
@@ -89,7 +88,7 @@ const useMatEditor = () => {
     }
   }, [canvas])
 
-  const addRectAngle = (name?: string) => {
+  const addRectAngle = (name: string) => {
     if (canvas === null)
       return;
     const object = new RectWithText({
@@ -111,7 +110,7 @@ const useMatEditor = () => {
         offsetX: -2,
         offsetY: 2
       }),
-      fontSize: 30,}, "Test")
+      fontSize: 30,}, name)
     object.setControlsVisibility({
       tr: false,
       tl: false,
@@ -123,7 +122,23 @@ const useMatEditor = () => {
       mb: false,
     })
     canvas.add(object)
+    var randomX = Math.round(Math.random()*500);
+            var randomY = Math.round(Math.random()*500);
+    object.animate({ left: randomX, top: randomY },
+      {
+        duration: 5000,
+        onChange: canvas.renderAll.bind(canvas),
+        easing: fabric.util.ease.easeOutExpo
+    })
+    
   }
+
+  /*
+  rect.animate({left: randomX, top: randomY}, {
+                duration: 1000,
+                onChange: canvas.renderAll.bind(canvas),
+                easing: fabric.util.ease.easeOutExpo
+            })*/
 
 
   return {
