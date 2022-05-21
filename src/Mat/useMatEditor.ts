@@ -1,24 +1,54 @@
 import { fabric } from 'fabric';
-import { Canvas, Group, IEvent } from 'fabric/fabric-impl';
 import { useState, useEffect } from 'react';
 import createAthleteBox from './createAthleteBox';
 
 interface Position {x: number, y: number, angle: number}
 
-const easeLinear = (t: number, b: number, c: number, d: number) => b + (t/d) * c;
+const easeLinear = (t: number, b: number, c: number, d: number) => b + (t / d) * c;
+const GRID = 5;
+
+const setGroupConfigs = (group: fabric.Group) => {
+  group.set({
+    snapAngle: 22.5
+  })
+  group.setControlsVisibility({
+    tr: false,
+    tl: false,
+    br: false,
+    bl: false,
+    ml: false,
+    mt: false,
+    mr: false,
+    mb: false,
+  })
+}
+
 
 const useMatEditor = (meterInPx: number) => {
   const [canvas, setCanvas] = useState<null | fabric.Canvas>(null)
   const [selectedObjects, setSelectedObject] = useState<fabric.Object[]>([])
 
   useEffect(() => {
-      const bindEvents = (canvasToBind: fabric.Canvas) => {
+    const bindEvents = (canvasToBind: fabric.Canvas) => {
       canvasToBind.on('selection:cleared', () => {
         setSelectedObject([])
       })
       canvasToBind.on('selection:created', (event: any) => {
-
+        const { selected } = event;
+        if (selected.length > 1)
+          setGroupConfigs(selected[0].group)
+        setSelectedObject(selected)
       })
+      canvasToBind.on('selection:updated', (event: any) => {
+          const { selected } = event;
+          setSelectedObject(selected)
+      })
+      canvasToBind.on('object:moving', function(options: any) { 
+        options.target.set({
+          left: Math.round(options.target.left / GRID) * GRID,
+          top: Math.round(options.target.top / GRID) * GRID
+        });
+      });
     }
     if (canvas) {
       bindEvents(canvas)
@@ -30,25 +60,8 @@ const useMatEditor = (meterInPx: number) => {
     if (canvas === null)
       return;
     const object = createAthleteBox(name, { meterInPx, x, y, angle });
-    object.setControlsVisibility({
-      tr: false,
-      tl: false,
-      br: false,
-      bl: false,
-      ml: false,
-      mt: false,
-      mr: false,
-      mb: false,
-    })
+    setGroupConfigs(object)
     canvas.add(object)
-    var randomX = Math.round(Math.random()*350);
-    var randomY = Math.round(Math.random()*350);
-    object.animate({ left: randomX+100, top: randomY+100 },
-      {
-        duration: 500,
-        onChange: canvas.renderAll.bind(canvas),
-        easing: easeLinear
-    })
   }
 
   return {
@@ -56,9 +69,8 @@ const useMatEditor = (meterInPx: number) => {
     onReady: (canvasReady: fabric.Canvas): void => {
       setCanvas(canvasReady)
     },
-    addRectAngle: addAthlete,
+    addAthlete,
   }
-
 }
 
 export default useMatEditor;
