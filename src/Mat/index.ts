@@ -1,5 +1,5 @@
-import Canvas from "./Canvas";
+import Mat from "./Mat";
 import useMatEditor from './useMatEditor'
 
-export default Canvas;
+export default Mat;
 export { useMatEditor }

@@ -1,13 +1,24 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
+import drawMat from './drawMat';
 
-interface ICanvasProps {
+interface Options {
   height: number,
   width: number,
+  backgroundColor: string,
+  lineColor: string,
+  lines?: number
+}
+
+interface ICanvasProps {
+  options: Options,
   onReady?: (canvas: fabric.Canvas) => void
 }
 
-export default function Canvas ({height, width, onReady}: ICanvasProps) {
+export default function Mat({ options, onReady }: ICanvasProps) {
+  const { height, width, backgroundColor, lineColor } = options;
+  const lines = options.lines === undefined ? 6: options.lines;
+
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -18,9 +29,9 @@ export default function Canvas ({height, width, onReady}: ICanvasProps) {
         canvas.setWidth(width);
         canvas.renderAll()
     }
-
-    canvas.backgroundColor = "green"
+    canvas.backgroundColor = backgroundColor;
     canvas.renderAll()
+    drawMat(canvas, lines, lineColor, 3);
 
 
     const resizeCanvas = () => {
@@ -30,12 +41,16 @@ export default function Canvas ({height, width, onReady}: ICanvasProps) {
 
     window.addEventListener('resize', resizeCanvas, false)
 
+
+
     return () => {
       canvas.dispose()
       window.removeEventListener('resize', resizeCanvas)
     }
 
   }, [ref]);
+
+
 
   return (
       <canvas ref={ref}>
